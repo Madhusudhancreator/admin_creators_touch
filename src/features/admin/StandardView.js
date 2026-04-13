@@ -141,11 +141,11 @@ export default function StandardView() {
         </div>
       </div>
 
-      {/* This Week's Meetings */}
+      {/* This Week&apos;s Meetings */}
       <div>
         <div className="flex items-center gap-2 mb-4">
           <CalendarDays size={18} className="text-[#cc0066]" />
-          <h2 className="text-lg font-semibold text-white">This Week's Meetings</h2>
+          <h2 className="text-lg font-semibold text-white">This Week&apos;s Meetings</h2>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           {WEEK_MEETINGS.map((meeting) => (

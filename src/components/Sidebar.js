@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -42,10 +43,12 @@ export default function Sidebar() {
     >
       {/* Logo */}
       <div className="flex items-center gap-3 px-5 py-5 border-b border-white/10">
-        <img
+        <Image
           src="/creator_touch_logo.png"
           alt="CTG"
-          className=" object-contain flex-shrink-0"
+          width={120}
+          height={40}
+          className="object-contain"
         />
       </div>
 
