@@ -72,6 +72,30 @@ export function deleteBlog(id) {
   return adminFetch(`/api/blogs/${id}`, { method: 'DELETE' });
 }
 
+/**
+ * Upload a cover image file for a blog post.
+ * Sends multipart/form-data; returns { url }.
+ */
+export async function uploadBlogImage(file) {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const res = await fetch(`${BASE_URL}/api/blogs/upload-image`, {
+    method: 'POST',
+    headers: { 'x-admin-key': ADMIN_KEY },
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const err = new Error(body.message || `Upload failed: ${res.status}`);
+    err.status = res.status;
+    throw err;
+  }
+
+  return res.json(); // { url }
+}
+
 // ── Contacts helpers ──────────────────────────────────────────────────────────
 
 /** Fetch all contact form submissions. */

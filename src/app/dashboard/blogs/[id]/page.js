@@ -1,9 +1,9 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
-import { fetchAllBlogs, updateBlog } from '@/lib/api';
-import { ArrowLeft, Save, Clock } from 'lucide-react';
+import { fetchAllBlogs, updateBlog, uploadBlogImage } from '@/lib/api';
+import { ArrowLeft, Save, Clock, Upload } from 'lucide-react';
 import dynamic from 'next/dynamic';
 import TagInput from '@/components/TagInput';
 
@@ -21,9 +21,11 @@ export default function EditBlogPage() {
 
   const [form, setForm]       = useState(null);
   const [autoTime, setAutoTime] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving]   = useState(false);
-  const [error, setError]     = useState(null);
+  const [loading, setLoading]       = useState(true);
+  const [saving, setSaving]         = useState(false);
+  const [uploading, setUploading]   = useState(false);
+  const [error, setError]           = useState(null);
+  const imageInputRef = useRef(null);
 
   useEffect(() => {
     fetchAllBlogs()
@@ -158,9 +160,40 @@ export default function EditBlogPage() {
 
         {/* Social image */}
         <div>
-          <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide mb-1.5">
-            Cover Image URL
-          </label>
+          <div className="flex items-center justify-between mb-1.5">
+            <label className="block text-xs font-semibold text-gray-600 uppercase tracking-wide">
+              Cover Image URL
+            </label>
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={() => imageInputRef.current?.click()}
+              className="flex items-center gap-1.5 px-3 py-1 rounded-md border border-gray-200 text-xs font-medium text-gray-600 hover:bg-gray-50 hover:border-[#0977a8] hover:text-[#0977a8] disabled:opacity-50 transition"
+            >
+              <Upload size={12} />
+              {uploading ? 'Uploading…' : 'Upload Image'}
+            </button>
+            <input
+              ref={imageInputRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                e.target.value = '';
+                setUploading(true);
+                try {
+                  const { url } = await uploadBlogImage(file);
+                  setField('social_image', url);
+                } catch (err) {
+                  setError(err.message);
+                } finally {
+                  setUploading(false);
+                }
+              }}
+            />
+          </div>
           <input
             type="url"
             value={form.social_image}
