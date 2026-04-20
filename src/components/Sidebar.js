@@ -8,28 +8,31 @@ import {
   CheckSquare,
   Calendar,
   MessageSquare,
-  Shield,
-  Layers,
   Newspaper,
   Inbox,
+  Users,
+  LogOut,
 } from 'lucide-react';
+import { useAuth } from '@/features/auth/AuthContext';
 
 const NAV_ITEMS = [
-  { label: 'Dashboard',  icon: LayoutDashboard, href: '/dashboard' },
-  { label: 'Blogs',      icon: Newspaper,       href: '/dashboard/blogs' },
-  { label: 'Contacts',   icon: Inbox,           href: '/dashboard/contacts' },
-  { label: 'Tasks',      icon: CheckSquare,     href: '/dashboard/tasks',    disabled: true },
-  { label: 'Calendar',   icon: Calendar,        href: '/dashboard/calendar', disabled: true },
-  { label: 'Chat',       icon: MessageSquare,   href: '/dashboard/chat',     disabled: true },
+  { label: 'Dashboard', icon: LayoutDashboard, href: '/dashboard' },
+  { label: 'Blogs',     icon: Newspaper,       href: '/dashboard/blogs' },
+  { label: 'Contacts',  icon: Inbox,           href: '/dashboard/contacts' },
+  { label: 'Members',   icon: Users,           href: '/dashboard/members', adminOnly: true },
+  { label: 'Tasks',     icon: CheckSquare,     href: '/dashboard/tasks',    disabled: true },
+  { label: 'Calendar',  icon: Calendar,        href: '/dashboard/calendar', disabled: true },
+  { label: 'Chat',      icon: MessageSquare,   href: '/dashboard/chat',     disabled: true },
 ];
-
-const ADMIN_NAV = { label: 'Admin Panel', icon: Shield, href: '/dashboard/admin', disabled: true };
-
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { user, logout } = useAuth();
 
-  const navItems = NAV_ITEMS;
+  const navItems = NAV_ITEMS.filter((item) => {
+    if (item.adminOnly && user?.role !== 'admin') return false;
+    return true;
+  });
 
   function isActive(href) {
     if (href === '/dashboard') return pathname === '/dashboard';
@@ -91,10 +94,22 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Bottom placeholder — login will go here later */}
-      <div className="px-3 py-4 border-t border-white/10">
-        <p className="text-white/20 text-xs text-center">CTG Admin Portal</p>
-      </div>
+      {/* User + Logout */}
+      {user && (
+        <div className="px-3 py-4 border-t border-white/10">
+          <div className="px-3 py-2 mb-1">
+            <p className="text-white/80 text-xs font-medium truncate">{user.name}</p>
+            <p className="text-white/30 text-[10px] truncate">{user.email}</p>
+          </div>
+          <button
+            onClick={logout}
+            className="flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition"
+          >
+            <LogOut size={16} />
+            Sign Out
+          </button>
+        </div>
+      )}
     </aside>
   );
 }

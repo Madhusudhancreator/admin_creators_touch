@@ -139,3 +139,68 @@ export function setBlockVisibility(section, enabled) {
     body: JSON.stringify({ enabled }),
   });
 }
+
+// ── Auth helpers ──────────────────────────────────────────────────────────────
+
+function getToken() {
+  if (typeof window === 'undefined') return '';
+  return localStorage.getItem('ctg_admin_token') || '';
+}
+
+export function loginApi(email, password) {
+  return apiFetch('/api/auth/login', {
+    method: 'POST',
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export function registerApi(name, email, password) {
+  return apiFetch('/api/auth/register', {
+    method: 'POST',
+    body: JSON.stringify({ name, email, password }),
+  });
+}
+
+export function getMeApi() {
+  return fetch(`${BASE_URL}/api/auth/me`, {
+    headers: { Authorization: `Bearer ${getToken()}` },
+  }).then(async (res) => {
+    if (!res.ok) throw new Error('Not authenticated');
+    return res.json();
+  });
+}
+
+// ── Users helpers ─────────────────────────────────────────────────────────────
+
+export function fetchAllUsers() {
+  return fetch(`${BASE_URL}/api/users`, {
+    headers: { Authorization: `Bearer ${getToken()}` },
+  }).then((r) => r.json());
+}
+
+export function fetchPendingUsers() {
+  return fetch(`${BASE_URL}/api/users/pending`, {
+    headers: { Authorization: `Bearer ${getToken()}` },
+  }).then((r) => r.json());
+}
+
+export function approveUser(id) {
+  return fetch(`${BASE_URL}/api/users/${id}/approve`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${getToken()}` },
+  }).then((r) => r.json());
+}
+
+export function rejectUser(id) {
+  return fetch(`${BASE_URL}/api/users/${id}/reject`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${getToken()}` },
+  }).then((r) => r.json());
+}
+
+export function deleteUser(id) {
+  return fetch(`${BASE_URL}/api/users/${id}`, {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${getToken()}` },
+  }).then((r) => r.json());
+}
