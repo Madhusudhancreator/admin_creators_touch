@@ -1,5 +1,7 @@
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
-const ADMIN_KEY = process.env.NEXT_PUBLIC_ADMIN_KEY || '';
+const BASE_URL          = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const ADMIN_KEY         = process.env.NEXT_PUBLIC_ADMIN_KEY || '';
+const CLOUDINARY_CLOUD  = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME || '';
+const CLOUDINARY_PRESET = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET || '';
 
 /**
  * Public fetch — no auth headers. Used for read-only endpoints.
@@ -73,27 +75,26 @@ export function deleteBlog(id) {
 }
 
 /**
- * Upload a cover image file for a blog post.
- * Sends multipart/form-data; returns { url }.
+ * Upload a cover image directly to Cloudinary (unsigned).
+ * Returns the secure CDN URL string.
  */
 export async function uploadBlogImage(file) {
   const formData = new FormData();
-  formData.append('image', file);
+  formData.append('file', file);
+  formData.append('upload_preset', CLOUDINARY_PRESET);
 
-  const res = await fetch(`${BASE_URL}/api/blogs/upload-image`, {
-    method: 'POST',
-    headers: { 'x-admin-key': ADMIN_KEY },
-    body: formData,
-  });
+  const res = await fetch(
+    `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/image/upload`,
+    { method: 'POST', body: formData }
+  );
 
   if (!res.ok) {
     const body = await res.json().catch(() => ({}));
-    const err = new Error(body.message || `Upload failed: ${res.status}`);
-    err.status = res.status;
-    throw err;
+    throw new Error(body.error?.message || `Upload failed: ${res.status}`);
   }
 
-  return res.json(); // { url }
+  const data = await res.json();
+  return { url: data.secure_url };
 }
 
 // ── Contacts helpers ──────────────────────────────────────────────────────────
